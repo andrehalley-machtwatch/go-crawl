@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"testing"
@@ -29,16 +30,16 @@ func TestReadUrls(t *testing.T) {
 		}
 	}
 
-	// Read URLs from the temporary file using the function being tested
-	readURLs, err := readFileUrls(tmpFile.Name())
+	// Read Urls from the temporary file using the function being tested
+	readUrls, err := readFileUrls(tmpFile.Name())
 	if err != nil {
 		t.Fatalf("Error reading URLs from file: %v", err)
 	}
 
-	// Check if the read URLs match the expected URLs
+	// Check if the read Urls match the expected Urls
 	for i, u := range urls {
-		if readURLs[i] != u {
-			t.Errorf("Expected URL: %s, Got: %s", u, readURLs[i])
+		if readUrls[i] != u {
+			t.Errorf("Expected URL: %s, Got: %s", u, readUrls[i])
 		}
 	}
 }
@@ -56,17 +57,19 @@ func TestSaveCrawlResult(t *testing.T) {
 		t.Fatalf("Error crawling and saving: %v", err)
 	}
 
-	// Check if the file is created and contains the expected content
-	filePath := filepath.Join("result", mockServer.URL+".html")
+	parseUrl, err := url.Parse(mockServer.URL)
+	if err != nil {
+		t.Fatalf("Error parsing URL: %v", err)
+	}
+	filePath := filepath.Join("result", parseUrl.Hostname()+".html")
 	content, err := os.ReadFile(filePath)
 	if err != nil {
 		t.Fatalf("Error reading file: %v", err)
 	}
 
+	// Check if the file is created and contains the expected content
 	expectedContent := "Mock HTML Content"
 	if string(content) != expectedContent {
 		t.Errorf("Expected content: %s, Got: %s", expectedContent, string(content))
 	}
 }
-
-// Add more tests as needed

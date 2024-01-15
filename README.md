@@ -1,3 +1,6 @@
+# Problems
+https://gist.github.com/mamaz/e1182ec16667fa948858784004f585e5
+
 # Description
 Go application for crawling website and save result into file.
 
@@ -8,4 +11,6 @@ Go application for crawling website and save result into file.
 - Output will be save into result folder
 
 # Unit testing
-In progress
+Add unit test for function:
+- readFileUrls
+- saveCrawlResult
