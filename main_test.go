@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"testing"
@@ -57,7 +58,11 @@ func TestSaveCrawlResult(t *testing.T) {
 	}
 
 	// Check if the file is created and contains the expected content
-	filePath := filepath.Join("result", mockServer.URL+".html")
+	parseUrl, err := url.Parse(mockServer.URL)
+	if err != nil {
+		t.Fatalf("Error parsing URL: %v", err)
+	}
+	filePath := filepath.Join("result", parseUrl.Hostname()+".html")
 	content, err := os.ReadFile(filePath)
 	if err != nil {
 		t.Fatalf("Error reading file: %v", err)
