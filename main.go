@@ -29,9 +29,18 @@ func main() {
 	for _, url := range urls {
 		wg.Add(1)
 		go func(wg *sync.WaitGroup, url string) {
-			err := saveCrawlResult(url)
+			// err := saveCrawlResult(url)
+			// if err != nil {
+			// 	fmt.Printf("Error crawling and saving: %v\n", err)
+			// }
+			resp, err := getHttpResponse(url)
 			if err != nil {
-				fmt.Printf("Error crawling and saving: %v\n", err)
+				fmt.Printf("Error getting HTTP response: %v\n", err)
+			}
+
+			err = saveResult(url, resp)
+			if err != nil {
+				fmt.Printf("Error saving result: %v\n", err)
 			}
 			wg.Done()
 		}(&wg, url)
@@ -58,6 +67,35 @@ func readFileUrls(inputFile string) ([]string, error) {
 	}
 
 	return urls, nil
+}
+
+func getHttpResponse(rawUrl string) ([]byte, error) {
+	resp, err := http.Get(rawUrl)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return body, nil
+}
+
+func saveResult(rawUrl string, body []byte) error {
+	parsedUrl, err := url.Parse(rawUrl)
+	if err != nil {
+		return err
+	}
+
+	filePath := filepath.Join("result", parsedUrl.Hostname()+".html")
+	err = os.WriteFile(filePath, body, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func saveCrawlResult(rawUrl string) error {
